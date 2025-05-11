@@ -1,23 +1,33 @@
 def call(Map config = [:]) {
-    // Validate required inputs
-    if (!config.repoUrl) {
-        error "Missing required parameter: repoUrl"
+def repoUrl = config.repoUrl
+def branch = config.branch ?: 'master'
+def mavenCommand = config.mavenCommand ?: 'clean package'
+
+    if (!repoUrl) {
+        error "Repository URL is required!"
     }
 
-    def branch = config.branch ?: 'master'
-    def mavenCommand = config.mavenCommand ?: 'clean package'
+    pipeline {
+        agent any
 
-    node {
-        // Ensure Maven is available
-        def MAVEN_HOME = tool 'Maven 3'  // Ensure this matches the configured Maven tool name in Jenkins
-        env.PATH = "${MAVEN_HOME}/bin:${env.PATH}"
+        stages {
+            stage('Clone Repository') {
+                steps {
+                    git branch: branch, url: repoUrl
+                }
+            }
 
-        stage('Clone Repository') {
-            git branch: branch, url: config.repoUrl
+            stage('Run Maven Command') {
+                steps {
+                    sh "mvn ${mavenCommand}"
+                }
+            }
         }
 
-        stage('Run Maven Command') {
-            sh "mvn ${mavenCommand}"
+        post {
+            always {
+                echo 'Build finished.'
+            }
         }
     }
 }

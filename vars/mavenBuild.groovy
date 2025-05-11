@@ -4,7 +4,7 @@ def call(Map config = [:]) {
         error "Missing required parameter: repoUrl"
     }
 
-    def branch = config.branch ?: 'main'
+    def branch = config.branch ?: 'master'
     def mavenCommand = config.mavenCommand ?: 'clean package'
 
     node {
@@ -17,7 +17,7 @@ def call(Map config = [:]) {
         }
 
         stage('Run Maven Command') {
-            sh 'mvn clean install'
+            sh "mvn ${mavenCommand}"
         }
     }
 }

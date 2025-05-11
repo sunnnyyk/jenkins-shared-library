@@ -17,7 +17,7 @@ def call(Map config = [:]) {
         }
 
         stage('Run Maven Command') {
-            sh "mvn ${mavenCommand}"
+            sh 'mvn clean install'
         }
     }
 }

@@ -7,26 +7,17 @@ def call(Map config = [:]) {
     def branch = config.branch ?: 'main'
     def mavenCommand = config.mavenCommand ?: 'clean package'
 
-    pipeline {
-        agent any
+    node {
+        // Ensure Maven is available
+        def MAVEN_HOME = tool 'Maven 3'  // Ensure this matches the configured Maven tool name in Jenkins
+        env.PATH = "${MAVEN_HOME}/bin:${env.PATH}"
 
-        environment {
-            MAVEN_HOME = tool 'Maven 3'  // Ensure this matches the configured Maven tool name in Jenkins
-            PATH = "${env.MAVEN_HOME}/bin:${env.PATH}"
+        stage('Clone Repository') {
+            git branch: branch, url: config.repoUrl
         }
 
-        stages {
-            stage('Clone Repository') {
-                steps {
-                    git branch: branch, url: config.repoUrl
-                }
-            }
-
-            stage('Run Maven Command') {
-                steps {
-                    sh "mvn ${mavenCommand}"
-                }
-            }
+        stage('Run Maven Command') {
+            sh "mvn ${mavenCommand}"
         }
     }
 }
